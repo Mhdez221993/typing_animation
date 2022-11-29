@@ -2,66 +2,68 @@ type QueueItem = () => Promise<void>
 
 export default class Typewriter {
   #queue: QueueItem[] = []
-  element: HTMLElement
-  loop: boolean
-  typingSpeed: number
-  deletingSpeed: number
+  #element: HTMLElement
+  #loop: boolean
+  #typingSpeed: number
+  #deletingSpeed: number
 
   constructor(
     parent: HTMLElement,
     {loop = false, typingSpeed = 50, deletingSpeed = 50} = {}
     ) {
-    this.element = document.createElement('div')
-    this.element.classList.add('whitespace')
-    parent.append(this.element)
-    this.loop = loop
-    this.typingSpeed = typingSpeed
-    this.deletingSpeed = deletingSpeed
+    this.#element = document.createElement('div')
+    this.#element.classList.add('whitespace')
+    parent.append(this.#element)
+    this.#loop = loop
+    this.#typingSpeed = typingSpeed
+    this.#deletingSpeed = deletingSpeed
   }
 
   typeString(string: string) {
-    this.addToQuee(resolve => {
+    this.#addToQuee(resolve => {
+      console.log(resolve);
+
         // Add string to screen
       let i = 0
 
       const interval = setInterval(() => {
-        this.element.append(string[i]);
+        this.#element.append(string[i]);
         i++
         if (i >= string.length) {
           clearInterval(interval)
           resolve()
         }
-      }, this.typingSpeed)
+      }, this.#typingSpeed)
     })
     return this
   }
 
   deleteChars(number: number) {
-    this.addToQuee(resolve => {
+    this.#addToQuee(resolve => {
       // Add string to screen
       let i = 0
 
       const interval = setInterval(() => {
-        this.element.innerText = this.element.innerText?.substring(0, this.element.innerText.length - 1)
+        this.#element.innerText = this.#element.innerText?.substring(0, this.#element.innerText.length - 1)
         i++
         if (i >= number) {
           clearInterval(interval)
           resolve()
         }
-      }, this.deletingSpeed)
+      }, this.#deletingSpeed)
     })
 
     return this
   }
 
-  deleteAll(deleteSpeed = this.deletingSpeed) {
-    this.addToQuee(resolve => {
+  deleteAll(deleteSpeed = this.#deletingSpeed) {
+    this.#addToQuee(resolve => {
       // Add string to screen
       let i = 0
 
       const interval = setInterval(() => {
-        this.element.innerText = this.element.innerText?.substring(0, this.element.innerText.length - 1)
-        if (this.element.innerText.length === 0) {
+        this.#element.innerText = this.#element.innerText?.substring(0, this.#element.innerText.length - 1)
+        if (this.#element.innerText.length === 0) {
           clearInterval(interval)
           resolve()
         }
@@ -72,7 +74,7 @@ export default class Typewriter {
   }
 
   pauseFor(duration: number) {
-    this.addToQuee(resolve => {
+    this.#addToQuee(resolve => {
 
         setTimeout(resolve, duration)
     })
@@ -85,14 +87,14 @@ export default class Typewriter {
 
     while (cb != null) {
       await cb()
-      if (this.loop) this.#queue.push(cb)
+      if (this.#loop) this.#queue.push(cb)
       cb = this.#queue.shift()
     }
 
     return this
   }
 
-  addToQuee(cb: (resolve: () => void) => void): void {
+  #addToQuee(cb: (resolve: () => void) => void): void {
     this.#queue.push(() => new Promise(cb))
   }
 }
