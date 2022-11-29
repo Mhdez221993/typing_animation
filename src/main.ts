@@ -2,7 +2,7 @@ import './style.css';
 
 import Typewriter from './Typewriter';
 
-const typewriter = new Typewriter(document.body, {loop: true})
+const typewriter = new Typewriter(document.getElementById('whitespace') as HTMLDivElement, {loop: true})
 
 typewriter
   .typeString('Where do I start?')
