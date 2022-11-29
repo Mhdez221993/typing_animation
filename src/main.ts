@@ -4,6 +4,9 @@ import Typewriter from './Typewriter';
 
 const typewriter = new Typewriter(document.getElementById('whitespace') as HTMLDivElement, {loop: true})
 
+// console.log(typewriter.#queue);
+
+
 typewriter
   .typeString('Where do I start?')
   .pauseFor(1000)

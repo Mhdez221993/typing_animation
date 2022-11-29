@@ -1,13 +1,16 @@
 type QueueItem = () => Promise<void>
 
 export default class Typewriter {
-  queue: QueueItem[] = []
+  #queue: QueueItem[] = []
   element: HTMLElement
   loop: boolean
   typingSpeed: number
   deletingSpeed: number
 
-  constructor(parent: HTMLElement, {loop = false, typingSpeed = 50, deletingSpeed = 50} = {}) {
+  constructor(
+    parent: HTMLElement,
+    {loop = false, typingSpeed = 50, deletingSpeed = 50} = {}
+    ) {
     this.element = document.createElement('div')
     this.element.classList.add('whitespace')
     parent.append(this.element)
@@ -25,8 +28,8 @@ export default class Typewriter {
         this.element.append(string[i]);
         i++
         if (i >= string.length) {
-          resolve()
           clearInterval(interval)
+          resolve()
         }
       }, this.typingSpeed)
     })
@@ -42,8 +45,8 @@ export default class Typewriter {
         this.element.innerText = this.element.innerText?.substring(0, this.element.innerText.length - 1)
         i++
         if (i >= number) {
-          resolve()
           clearInterval(interval)
+          resolve()
         }
       }, this.deletingSpeed)
     })
@@ -52,26 +55,44 @@ export default class Typewriter {
   }
 
   deleteAll(deleteSpeed = this.deletingSpeed) {
-    console.log(deleteSpeed);
+    this.addToQuee(resolve => {
+      // Add string to screen
+      let i = 0
+
+      const interval = setInterval(() => {
+        this.element.innerText = this.element.innerText?.substring(0, this.element.innerText.length - 1)
+        if (this.element.innerText.length === 0) {
+          clearInterval(interval)
+          resolve()
+        }
+      }, deleteSpeed)
+    })
 
     return this
   }
 
   pauseFor(duration: number) {
-    console.log(duration);
+    this.addToQuee(resolve => {
+
+        setTimeout(resolve, duration)
+    })
 
     return this
   }
 
   async start(){
-    for (let cb of this.queue) {
-      await cb()
+    let cb = this.#queue.shift()
 
+    while (cb != null) {
+      await cb()
+      if (this.loop) this.#queue.push(cb)
+      cb = this.#queue.shift()
     }
+
     return this
   }
 
   addToQuee(cb: (resolve: () => void) => void): void {
-    this.queue.push(() => new Promise(cb))
+    this.#queue.push(() => new Promise(cb))
   }
 }
